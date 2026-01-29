@@ -68,9 +68,8 @@ if __name__ == "__main__":
     max_epochs = 50
     learning_rate = 5e-4
     # data_path = '../data/downtasks/TUAB/tuh_eeg_abnormal/edf/processed'
-    data_path = '../data/downtasks/TUEV/tuh_eeg_events/edf/processed'
-    args.data_path_1 = data_path
-    model_save_name = "DAREEEG_large_TUEV"
+    data_path = args.data_path_1
+    model_save_name = f"DAREEEG_large_{dataset}"
     device = torch.device(args.device)
     
     model = DARE_EEG(**model_config)
