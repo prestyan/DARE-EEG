@@ -81,7 +81,7 @@ if __name__ == "__main__":
     TUAB dataset is downloaded from https://isip.piconepress.com/projects/tuh_eeg/html/downloads.shtml
     """
     # root to abnormal dataset
-    root = "./tuh_eeg_abnormal/edf/"
+    root = "../data/downtasks/tuh_eeg_abnormal/edf/"
     channel_std = "01_tcp_ar"
 
     # train, val abnormal subjects
@@ -148,4 +148,5 @@ if __name__ == "__main__":
     # split and dump in parallel
     with Pool(processes=4) as pool:
         # Use the pool.map function to apply the square function to each element in the numbers list
+
         result = pool.map(split_and_dump, parameters)
