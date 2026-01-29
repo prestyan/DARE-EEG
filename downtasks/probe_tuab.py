@@ -51,8 +51,9 @@ if __name__ == "__main__":
         "conv_layers": 2,
         # Encoder parameter
         "is_eval": args.eval,
-        "encoder_path": '../pretrain/logs/checkpoints/DARE-EEG_3_base2@epoch=199-valid_loss=0.5981.ckpt',
-        "complete_model_path": './logs/checkpoints/checkpoint-ours_base_TUAB_best_3.pth',
+        # "encoder_path": '../pretrain/logs/checkpoints/DARE-EEG_3_base2@epoch=199-valid_loss=0.5981.ckpt',
+        "encoder_path": args.encoder_path,
+        "complete_model_path": f'./logs/checkpoints/checkpoint-ours_base_{dataset}_best_3.pth',
         "models_configs": encoder_config,
         "freeze_encoder": False,
         # MLPClassifier parameter
