@@ -36,6 +36,8 @@ All training logs, model checkpoints, and other visualization files are saved un
 ```bash
 pretrain/logs
 pretrain/logs/checkpoints
+downtasks/logs
+downtasks_others/logs
 ```
 
 ## DARE-EEG/downtasks
@@ -117,4 +119,82 @@ data/pretrain
         ├── 3
         └── 4
 ```
-Then, run the code `python run_pretraining` in the pretrain folder. If you want to change the model architecture, please modify the `tag` option in `config.py`.
+Then, run the code `python run_pretraining` in the pretrain folder. If you want to change the model architecture, please modify the `tag` option in `config.py`. The code also includes a Case option, which is used for module ablation experiments and should generally be set to Case5.
+
+### Downtasks: TUAB & TUEV
+First, you need to download the TUH-EEG dataset, selecting both the TUAB and TUEV categories.  Refer to the download links provided in Appendix D of the paper. After downloading, organize the data as follows, with the `processed` folder used to store the processed data.
+
+- RUN TUAB
+```bash
+data/downtasks/TUAB
+└── tuh_eeg_anbormal
+    ├── AAREADME.txt
+    ├── AAREADME.txt,v
+    ├── edf
+    │   ├── eval
+    │   ├── processed
+    │   └── train
+    ├── needs_fixin.list
+    ├── xx.dat
+    └── xx.sh
+```
+Then run `python process_tuab.py`. The processed data will be divided into training, validation, and test sets and placed in the `processed` folder. Finally, please run the following code to load the pre-trained encoder and test it on the TUAB dataset. The complete command we recommend running is as follows:
+```bash
+cd DARE-EEG/downtasks/
+CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 --nnodes=1 --node_rank=0 --master_addr=localhost --master_port=29500 \
+probe_tueg.py --dataset=TUAB --data_path_1=../data/downtasks/TUAB/tuh_eeg_abnormal/edf/processed --encoder_path=../pretrain/logs/checkpoints/DARE-EEG_3_Deep@epoch=193-valid_loss=0.6080.ckpt
+```
+- RUN TUEV
+You need to organize the TUEV data in the following format. Then run `python process_tuev.py`.
+```bash
+data/downtasks/TUEV
+└── tuh_eeg_events
+    ├── AAREADME.txt
+    ├── AAREADME.txt,v
+    ├── edf
+    │   ├── eval
+    │   ├── processed
+    │   └── train
+    ├── needs_fixin.list
+    ├── xx.dat
+    └── xx.sh
+```
+The processed data will be divided into training, validation, and test sets and placed in the `processed` folder. Finally, please run the following code to load the pre-trained encoder and test it on the TUAB dataset. The complete command we recommend running is as follows:
+```bash
+cd DARE-EEG/downtasks/
+CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 --nnodes=1 --node_rank=0 --master_addr=localhost --master_port=29500
+probe_tueg.py --enable_deepspeed --layer_decay=0.65 --dropout=0.3 --max_epochs=30 --dataset=TUEV --data_path_1=../data/downtasks/TUEV/tuh_eeg_events/edf/processed --encoder_path=../pretrain/logs/checkpoints/DARE-EEG_3_Deep@epoch=193-valid_loss=0.6080.ckpt
+```
+If you encounter errors with the PyTorch kernel on multiple GPUs during runtime, we recommend training on a single GPU. This is due to incompatibility between the operators and the CUDA graphics card configuration.  Reducing the batch size may also help.
+
+> **Note**  
+> Please always pay attention to the file storage location; if adjustments are needed, be sure to modify the file path to avoid errors.
+> On the TUEV dataset, we used different label weights to prevent the majority class samples from dominating the loss function, but this operation is not necessary for the TUAB dataset.
+
+### Downtasks: An example on BCIC-2B
+
+We first provide example code for an experiment using DARE-EEG pre-trained weights and a conv-linear-probing on the BCIC-2B dataset. This code can be run directly. 
+First, please download the BCIC-2B dataset. Organize it into the following format:
+```bash
+DARE-EEG/data/downtasks/BCIC
+├─raw_data
+|  +---BCI-2b
+|  |       B0101T.gdf
+|  |       B0101T.mat
+|  |       B0102T.gdf
+|  |       B0102T.mat
+|  |       ...
+├─Data
+```
+The `Data` folder is used to store the processed data. Then, run the following command to obtain the preprocessed data:
+```bash
+cd DARE-EEG/data/downtasks
+python process_bcic.py
+```
+The `process_bcic.py` file also contains code for processing the BCIC-2A dataset; simply uncomment the relevant lines in the main function to use it.
+Then, run the following commands to use and freeze the pre-trained weights and then conduct experiments on the BCIC-2B dataset.
+```bash
+cd DARE-EEG/downtasks_others
+python convp_bcic2b.py
+```
+Additionally, the `convp_bcic2b_para.py` file is provided, which is code for parameter ablation experiments. If you need to use different pre-trained weights, please change the `tag` option in `LitModelConvp`.
