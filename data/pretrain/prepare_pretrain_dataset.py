@@ -227,6 +227,75 @@ def get_SEED_dataset():
                           ]))
     return dataset
 
+def get_MATB_dataset():
+    import scipy.io
+    from torch.utils.data import Dataset
+    from torcheeg.transforms import ToTensor, To2d
+    import torch.nn.functional as F
+    import torch
+
+    class MATBDataset(Dataset):
+        def __init__(self, root_path="./MATB", target_sr=256, original_sr=250):
+            self.samples = []
+            self.labels = []
+            self.target_sr = target_sr
+            self.original_sr = original_sr
+
+            # 读取通道映射
+            channel_map = {}
+            with open(os.path.join(root_path, "channel.txt"), 'r') as f:
+                for line in f:
+                    idx, name = line.strip().split(':')
+                    channel_map[int(idx.strip()) - 1] = name.strip().upper()
+
+            # 获取目标通道索引
+            channel_indices = [i for i, name in channel_map.items() if name in use_channels_names_matb]
+            channel_order = [use_channels_names_matb.index(channel_map[i]) for i in channel_indices]
+            self.reordered_indices = [i for _, i in sorted(zip(channel_order, channel_indices))]
+
+            # 加载所有.mat文件
+            for file in os.listdir(root_path):
+                if file.endswith('.mat'):
+                    mat = scipy.io.loadmat(os.path.join(root_path, file))
+                    raw_data = mat['S1Data']
+                    data = mat['S1Data'][self.reordered_indices]  # [selected_channel, 500, sample]
+                    name2index = {v: k for k, v in channel_map.items()}
+                    if 'FCZ' in name2index:
+                        fcz_data = raw_data[name2index['FCZ']]  # shape: [500, N]
+                        # 插入到通道维度 index=26 处
+                        data = np.insert(data, 27, fcz_data, axis=0)  # axis=0 是通道维度
+                        print(f"FCZ inserted as CZ (28th channel) for file: {file}")
+                    label = mat['S1Label'].squeeze()  # [sample]
+                    for i in range(data.shape[2]):
+                        self.samples.append(data[:, :, i])  # [channel, time]
+                        self.labels.append(int(label[i]))
+
+            # 初始化 transforms
+            self.to_tensor = ToTensor()
+            self.to_2d = To2d()
+
+        def __len__(self):
+            return len(self.samples)
+
+        def __getitem__(self, idx):
+            x = torch.tensor(self.samples[idx], dtype=torch.float32)  # [C, T]
+            x = x.unsqueeze(0)  # [1, C, T]
+            x = F.interpolate(x, size=int(x.shape[-1] * self.target_sr / self.original_sr) * 2, mode='nearest')
+            x = x / 1000
+            x = x.squeeze(0)  # [C, T]
+
+            # 不再使用 torcheeg 的 ToTensor/To2d，而是手动 reshape
+            if x.ndim == 2:
+                x = x.unsqueeze(0)  # 模拟 [1, C, T]
+            x = x.permute(1, 2, 0).squeeze(-1)  # 转换为 [C, T] 的 2D tensor (To2d 模拟)
+
+            y = self.labels[idx]
+            return x, y
+
+    return MATBDataset()
+
+
+
 
 if __name__=="__main__":
     import random
@@ -235,7 +304,7 @@ if __name__=="__main__":
 
     cfold = 0
     
-    for tag in ["PhysioNetMI", "tsu_benchmark", "seed", "m3cv"]: #, MMWM Provided in another Python file.
+    for tag in ["PhysioNetMI", "tsu_benchmark", "seed", "m3cv", "matb"]:
         if tag == "PhysioNetMI":
             dataset = get_physionet_dataset()
         elif tag == "tsu_benchmark":
@@ -244,6 +313,8 @@ if __name__=="__main__":
             dataset = get_M3CV_dataset()
         elif tag == "seed":
             dataset = get_SEED_dataset()
+        elif tag == "matb":
+            dataset = get_MATB_dataset()
         else:
             raise ValueError("Invalid tag")
         print(len(dataset))
