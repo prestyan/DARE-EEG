@@ -198,3 +198,106 @@ cd DARE-EEG/downtasks_others
 python convp_bcic2b.py
 ```
 Additionally, the `convp_bcic2b_para.py` file is provided, which is code for parameter ablation experiments. If you need to use different pre-trained weights, please change the `tag` option in `LitModelConvp`.
+
+## How to use it on other expanded datasets
+
+We provide a paradigm for applying DARE-EEG to other EEG datasets. The specific steps are as follows.
+
+1. **Copy the required libraries**: To use DARE-EEG fully, the following two files are required: `base_model.py` and `probe_model.py`. They are stored in `downtasks_others/Modules/models`. `base_model` is used to define the EEG encoder, while `probe_model` is used to define the channel and sampling rate adaptation module, as well as the dataset-specific task head of the model.
+2. **Define the required models in the code**: You can define your dataset-specific model using the following code:
+```python
+from models.base_model import EEGTransformer
+from models.prob_model import ConvHead
+...
+def load_DARE_EEG(load_path = '../pretrain/logs/checkpoints/DARE-EEG_3_large@epoch=193-valid_loss=0.6080.ckpt',
+                  tag = 'deep
+                  load_pretrain = True,
+                  img_size,
+                  use_channels_names, # The channel name you are using...
+                  in_channels, # Dataset input channel
+                  out_channels, # =len(use_channels_names)
+                  in_time_length,
+                  out_time_length,
+                  conv_layers):
+
+        # init model
+        if tag=="deep":
+            embed_num, embed_dim, depth, num_heads = 4, 512, 8, 4
+            feature_dimension = 2048
+        elif tag=="base":
+            embed_num, embed_dim, depth, num_heads = 4, 256, 8, 8
+            feature_dimension = 1024
+        elif tag=="small":
+            embed_num, embed_dim, depth, num_heads = 1, 256, 6, 4
+            feature_dimension = 256
+        elif tag=="light":
+            embed_num, embed_dim, depth, num_heads = 1, 128, 6, 4
+            feature_dimension = 128
+        elif tag=="nano":
+            embed_num, embed_dim, depth, num_heads = 1, 64, 2, 4
+            feature_dimension = 64
+
+        target_encoder = EEGTransformer(
+            img_size=[7, 1024],
+            patch_size=64,
+            embed_num=4,
+            embed_dim=512,
+            depth=8,
+            num_heads=8,
+            mlp_ratio=4.0,
+            drop_rate=0.0,
+            attn_drop_rate=0.0,
+            drop_path_rate=0.0,
+            init_std=0.02,
+            qkv_bias=True, 
+            norm_layer=partial(nn.LayerNorm, eps=1e-6))
+            
+        chans_id       = target_encoder.prepare_chan_ids(use_channels_names)
+        if load_pretrain:
+            pretrain_ckpt = torch.load(load_path)
+            
+            target_encoder_stat = {}
+            for k,v in pretrain_ckpt['state_dict'].items():
+                if k.startswith("target_encoder."):
+                    target_encoder_stat[k[15:]]=v
+                
+            self.target_encoder.load_state_dict(target_encoder_stat)
+            for blk in model.blocks:
+                for p in blk.parameters():
+                    p.requires_grad = False  
+        chan_conv = ConvHead(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            in_time_length=in_time_length,
+            out_time_length=out_time_length,
+            conv_layers=conv_layers,
+            dropout=0.1
+        )
+    return target_encoder, chan_conv, chans_id
+```
+3. **Using a predefined model**: Below, you can use it in the `forward` method like this:
+```python
+encoder, chead, chans_id = load_DARE_EEG(...)
+...
+# in model forward:
+def forward(self, x, chans_id):
+    x = chead(x)
+    x = encoder(x, chans_id.to(x))
+    # The subsequent structure you use to receive the encoder's output representations.
+    ...    
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
