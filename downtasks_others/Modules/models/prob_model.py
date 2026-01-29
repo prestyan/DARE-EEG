@@ -12,7 +12,7 @@ class LinearWithConstraint(nn.Linear):
     def forward(self, x):
         if self.doWeightNorm:
             with torch.no_grad():
-                # 对每个输出神经元的权重向量做 L2 max-norm（dim=0）
+                # Apply L2 max-norm (dim=0) to the weight vector of each output neuron.
                 self.weight.copy_(torch.renorm(self.weight, p=2, dim=0, maxnorm=self.max_norm))
         return super().forward(x)
 

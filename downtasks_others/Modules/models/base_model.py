@@ -180,9 +180,6 @@ class RotaryEmbedding(nn.Module):
     
     
 
-
-################################# EEGPT Model Begin ######################################
-
 class DropPath(nn.Module):
     """Drop paths (Stochastic Depth) per sample  (when applied in main path of residual blocks).
     """
@@ -784,93 +781,3 @@ class EEGTransformer(nn.Module):
         x = x.reshape((B, N, self.embed_num, -1))
         
         return x
-    
-
-
-if __name__=="__main__":
-    m = PatchNormEmbed((3,100), 10, 2)
-    print(m(1000*torch.randn((1,3,100))))
-    exit()
-    VIT_EMBED_DIMS = {
-        'vit_little': 32*3,
-        'vit_tiny': 192,
-        'vit_small': 384,
-        'vit_base': 768,
-        'vit_large': 1024,
-        'vit_huge': 1280,
-        'vit_giant': 1408,
-    }
-
-    import random
-    import os
-    def seed_torch(seed=1029):
-        random.seed(seed)
-        os.environ['PYTHONHASHSEED'] = str(seed) # 为了禁止hash随机化，使得实验可复现
-        np.random.seed(seed)
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed) # if you are using multi-GPU.
-        torch.backends.cudnn.benchmark = False
-        torch.backends.cudnn.deterministic = True
-
-
-    seed_torch(7)
-    model = EEGTransformer(
-        img_size=[2, 12],
-        patch_size=2,
-        embed_dim=4,
-        depth=2,
-        num_heads=1,
-        mlp_ratio=4.0,
-        drop_rate=0.0,
-        attn_drop_rate=0.0,
-        drop_path_rate=0.0,
-        init_std=0.02,
-        qkv_bias=True, 
-        norm_layer=partial(nn.LayerNorm, eps=1e-6))
-    
-    x = torch.rand(1,2,12)
-    out = model(x, mask_x=torch.tensor([[4,5],[0,1],[2,3]]))
-    # out = model(x, mask_t=torch.tensor([0,1,4,5]))
-    print(out.shape) 
-    # exit()
-    
-    
-    model2 = EEGTransformerPredictor(
-        num_patches=model.num_patches,
-        embed_dim=4,
-        predictor_embed_dim=4,
-        depth=2,
-        num_heads=1,
-        mlp_ratio=4.0,
-        drop_rate=0.0,
-        attn_drop_rate=0.0,
-        drop_path_rate=0.0,
-        init_std=0.02,
-        qkv_bias=True, 
-        norm_layer=partial(nn.LayerNorm, eps=1e-6))
-    
-    # a = model2(out, )
-    # print(a) 
-    # out[0,1,0,0]=-1
-    # a = model2(out)
-    # print(a, a.shape) 
-    a = model2(out, mask_x=torch.tensor([[4,5],[0,1],[2,3]]), mask_t=None)
-    
-    model3 = EEGTransformerReconstructor(
-        num_patches=model.num_patches,
-        patch_size=2,
-        embed_dim=4,
-        reconstructor_embed_dim=4,
-        depth=2,
-        num_heads=1,
-        mlp_ratio=4.0,
-        drop_rate=0.0,
-        attn_drop_rate=0.0,
-        drop_path_rate=0.0,
-        init_std=0.02,
-        qkv_bias=True, 
-        norm_layer=partial(nn.LayerNorm, eps=1e-6))
-    
-    b = model3(a, mask_y=torch.tensor([6,7,8,9]))
-    print(b) 
