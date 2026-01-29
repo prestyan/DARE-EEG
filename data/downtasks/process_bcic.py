@@ -1,7 +1,7 @@
 import os
 import sys
 current_path = os.path.abspath(os.path.dirname(__file__))
-root_path = "./raw_data"
+root_path = "./BCIC/raw_data"
 target_path = "./processed_data"
 
 sys.path.append(current_path)
@@ -121,6 +121,6 @@ def Load_BCIC_2b_raw_data(tmin=0, tmax=4,bandpass = [0,38]):
     
 if __name__ == '__main__':
     
-    Load_BCIC_2a_raw_data()
+    # Load_BCIC_2a_raw_data()
     Load_BCIC_2b_raw_data()
     
