@@ -232,8 +232,10 @@ if __name__=="__main__":
     import random
     import os
     import tqdm
+
+    cfold = 0
     
-    for tag in ["PhysioNetMI", "tsu_benchmark", "seed"]: #, "m3cv"
+    for tag in ["PhysioNetMI", "tsu_benchmark", "seed", "m3cv"]: #, MMWM Provided in another Python file.
         if tag == "PhysioNetMI":
             dataset = get_physionet_dataset()
         elif tag == "tsu_benchmark":
@@ -250,9 +252,10 @@ if __name__=="__main__":
         for i, (x,y) in tqdm.tqdm(enumerate(dataset)):
             dst="./merged/"
             if random.random()<0.1:
-                dst+="ValidFolder/0/"
+                dst+=f"ValidFolder/{cfold}/"
             else:
-                dst+="TrainFolder/0/"
+                dst+=f"TrainFolder/{cfold}/"
+            cfold = cfold + 1
             os.makedirs(dst, exist_ok=True)
             data = x.squeeze_(0)
             # data = data.clone().detach().cpu()
