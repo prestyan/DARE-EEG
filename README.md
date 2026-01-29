@@ -68,6 +68,10 @@ cd data/pretrain/merged/ValidFolder/
 > Raw EEG data are **NOT included** in this repository due to copyright and privacy restrictions.  
 > Please download the datasets from their official sources.
 
+## Get Checkpoints
+
+You can access the pre-trained weights in the [`checkpoints`](pretrain/logs/checkpoints) folder; more weights will be updated there.
+
 ## Getting Started
 ### Environment Setup
 Please install the requirements.txt using `pip install -r requirements.txt`:
