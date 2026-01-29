@@ -235,8 +235,7 @@ class LitModelConvp(pl.LightningModule):
 
 # load configs
 from utils import get_data
-data_path = "..
-/data/downtasks/BCIC_2b_0_38HZ"
+data_path = "../data/downtasks/BCIC/Data/BCIC_2b_0_38HZ"
 import math
 seed_torch(2024)
 for i in range(1, 10):
