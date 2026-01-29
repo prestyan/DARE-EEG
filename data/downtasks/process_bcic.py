@@ -2,7 +2,7 @@ import os
 import sys
 current_path = os.path.abspath(os.path.dirname(__file__))
 root_path = "./BCIC/raw_data"
-target_path = "./processed_data"
+target_path = "./BCIC"
 
 sys.path.append(current_path)
 
@@ -69,9 +69,9 @@ def Load_BCIC_2a_raw_data(tmin=0, tmax=4,bandpass = [0,38],resample = None):
         print('test_y:',test_y.shape)
         
         if bandpass is None:
-            SAVE_path = os.path.join(root_path,'Data','BCIC_2a')
+            SAVE_path = os.path.join(target_path,'Data','BCIC_2a')
         else:
-            SAVE_path = os.path.join(root_path,'Data','BCIC_2a_{}_{}HZ'.format(bandpass[0],bandpass[1]))
+            SAVE_path = os.path.join(target_path,'Data','BCIC_2a_{}_{}HZ'.format(bandpass[0],bandpass[1]))
 
         if not os.path.exists(SAVE_path):
             os.makedirs(SAVE_path)
@@ -95,9 +95,9 @@ def Load_BCIC_2b_raw_data(tmin=0, tmax=4,bandpass = [0,38]):
     
     data_path = os.path.join(root_path,'BCI-2b')
     if bandpass is None:
-        save_path = os.path.join(root_path,r'Data','BCIC_2b')
+        save_path = os.path.join(target_path,r'Data','BCIC_2b')
     else:
-        save_path = os.path.join(root_path,r'Data','BCIC_2b_{}_{}HZ'.format(bandpass[0],bandpass[1]))
+        save_path = os.path.join(target_path,r'Data','BCIC_2b_{}_{}HZ'.format(bandpass[0],bandpass[1]))
 
     # if not os.path.exists(save_path):
     #     os.makedirs(save_path)
