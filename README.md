@@ -70,7 +70,7 @@ cd data/pretrain/merged/ValidFolder/
 
 ## Get Checkpoints
 
-You can access the pre-trained weights in the [`checkpoints`](pretrain/logs/checkpoints) folder; more weights will be updated there.
+You can access the pre-trained weights in the [`checkpoints`](pretrain/logs/checkpoints/README.md) folder; more weights will be updated there.
 
 ## Getting Started
 ### Environment Setup
