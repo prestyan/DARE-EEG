@@ -2,7 +2,20 @@
 
 This repository provides the official implementation of **DARE-EEG**, a foundation model designed to learn **dual-aligned EEG REpresentations** through large-scale pre-training and adaptation to diverse downstream tasks.
 
-We have for the first time proposed the mask-invariance property of EEG in the encoding space. Based on this, DARE-EEG focuses on robust representation learning under missing, masked, and noisy EEG signal conditions, which are common in non-invasive EEG acquisition. The learned representations are transferable across multiple EEG paradigms and datasets.
+We have for the first time proposed the mask-invariance property of EEG in the encoding space. Based on this, DARE-EEG focuses on robust representation learning under missing, masked, and noisy EEG signal conditions, which are common in non-invasive EEG acquisition. The learned representations are transferable across multiple EEG paradigms and datasets. Below is a list of items that have already been provided and items that will be completed soon.
+- [x] DARE-EEG pre-training framework
+- [x] Specific implementations of Mask Alignment and Anchor Alignment
+- [ ] Tools used in pre-training
+- [x] DARE-EEG Experimental code for the TUHEEG dataset(TUAB)
+- [ ] DARE-EEG Experimental code for the TUHEEG dataset(TUEV)
+- [ ] Other Experimental code for the TUHEEG dataset
+- [x] DARE-EEG Experimental code for the BCIC dataset
+- [ ] Other Experimental code for the BCIC dataset
+- [ ] The code for the remaining downstream tasks dataset
+- [x] The framework required for parameter ablation experiments
+- [x] Nano pre-trained checkpoints
+- [ ] Deep, Base pre-trained checkpoints
+- [x] Examples of migrating to other datasets
 
 ---
 
