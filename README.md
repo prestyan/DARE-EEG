@@ -5,7 +5,7 @@ This repository provides the official implementation of **DARE-EEG**, a foundati
 We have for the first time proposed the mask-invariance property of EEG in the encoding space. Based on this, DARE-EEG focuses on robust representation learning under missing, masked, and noisy EEG signal conditions, which are common in non-invasive EEG acquisition. The learned representations are transferable across multiple EEG paradigms and datasets. Below is a list of items that have already been provided and items that will be completed soon.
 - [x] DARE-EEG pre-training framework
 - [x] Specific implementations of Mask Alignment and Anchor Alignment
-- [ ] Tools used in pre-training
+- [ ] Tools used in pre-training (Including Data Process)
 - [x] DARE-EEG Experimental code for the TUHEEG dataset(TUAB)
 - [ ] DARE-EEG Experimental code for the TUHEEG dataset(TUEV)
 - [ ] Other Experimental code for the TUHEEG dataset
@@ -119,7 +119,7 @@ tqdm==4.66.2
 ```
 ### Pre-training
 
-To start pre-training DARE-EEG, first, you need to prepare the training dataset.  Instructions for downloading and setting up the dataset can be found in Appendix D of the paper. After downloading the raw data, please run `python ./data/pretrain/prepare_pretrain_dataset.py`. After the process is complete, the file structure should be as follows:
+To start pre-training DARE-EEG, first, you need to prepare the training dataset.  Instructions for downloading and setting up the dataset can be found in Appendix D of the paper. After downloading the raw data, please run `python ./data/pretrain/prepare_pretrain_dataset.py`. The code for this part of the data processing is currently being refined. The processing method follows the appendix of the paper. After the process is complete, the file structure should be as follows:
 ```bash
 data/pretrain
 └── merged
